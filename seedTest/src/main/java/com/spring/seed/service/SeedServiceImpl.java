@@ -2,6 +2,9 @@ package com.spring.seed.service;
 
 
 
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
@@ -17,6 +20,14 @@ public class SeedServiceImpl implements SeedService {
 	
 	public boolean create(SeedVO vo) throws Exception {
 		return dao.create(vo);
+	}
+	
+	public int total(Map<String, Object> map) {
+		return dao.total(map);
+	}
+
+	public List<SeedVO> list(Map<String, Object> map){
+		return dao.list(map);
 	}
 	
 

@@ -8,24 +8,24 @@
 </head>
 <body>
 <div align="center">
-<form>
+<form method="POST" action="create">
 	<table>
 	<tr>
 		<th>작성자</th>
 		<td>
-			<input type = "text" name = "seedWriter">
+			<input type = "text" name = "seed_writer" >
 		</td>
 	</tr>
 	<tr>
 		<th>제목</th>
 		<td>
-			<input type = "text" name = "seedTitle">
+			<input type = "text" name = "seed_title">
 		</td>
 	</tr>
 	<tr>
 		<th>내용</th>
 		<td>
-			<input type = "text" name = "seedContent">
+			<input type = "text" name = "seed_content">
 		</td>
 	</tr>
 	

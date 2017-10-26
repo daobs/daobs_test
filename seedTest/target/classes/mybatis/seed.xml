@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="seed">
+	<insert id = "create" parameterType="SeedVO">
+		INSERT INTO seed(seed_writer, seed_title, seed_content, seed_viewcnt)
+		VALUES(#{seed_writer}, #{seed_title}, #{seed_content}, 0)  
+	</insert>
+	
+	<select id="total" resultType="int" parameterType="Map">
+		select count(*) from seed 
+	<where>
+	    <choose>
+	       <when test="col=='title'">
+	    		title LIKE CONCAT('%', #{word},'%') 
+	       </when>
+	       <when test="col=='content'">
+	       		content LIKE CONCAT('%', #{word},'%')
+	       </when>
+	    </choose>
+   </where>
+	</select>
+	
+	<select id="list" resultType="SeedVO" parameterType="Map">
+		SELECT seedno, seed_title, seed_content, seed_viewcnt, seed_writer
+			FROM (
+			SELECT seedno, seed_title, seed_content, seed_viewcnt, seed_writer
+				FROM (
+				SELECT seedno, seed_title, seed_content, seed_viewcnt, seed_writer 
+				FROM seed 
+	<where>
+      <choose>
+	      <when test="col=='title'">
+	      	title LIKE CONCAT('%', #{word},'%') 
+	      </when>
+	      <when test="col=='content'">
+	      	content LIKE CONCAT('%', #{word},'%')
+	      </when>
+      </choose>
+   </where>
+			)a 
+		)b  order by seedno desc limit #{sno}, 5
+		    
+	</select>                                 
+                         
+                         
+</mapper>
