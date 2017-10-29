@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="image">
+	<select id="getRefnum" parameterType="int" resultType="int">
+		select count(*) 
+		from image 
+		where refnum = #{refnum}
+	</select>
+	<update id="upAnsnum" parameterType="Map">
+		update image         
+		set ansnum = ansnum+1   
+		where grpno = #{grpno} and ansnum>#{ansnum}
+	</update>
+	<select id="replyRead" parameterType="int" resultType="ImageDTO">
+		select imageno, title, grpno, indent, ansnum,fname,pname
+		from image                                        
+		where imageno=#{imageno}                                
+	</select>
+	<insert id="replyCreate" parameterType="ImageDTO">
+		insert into image(imageno, title, content,                                    
+		wdate,grpno,indent,ansnum,refnum,fname,pname,passwd)                            
+		values((select NVL(Max(imageno),0)+1 as imageno from image),#{title}, #{content},
+		sysdate,#{grpno},#{indent}+1,#{ansnum}+1,#{imageno},#{fname},#{pname},#{passwd})
+	</insert>
+	<update id="updateFile" parameterType="Map">
+		update image 
+		set fname = #{fname}
+		where imageno = #{imageno}
+	</update>
+	<select id="passwdCheck" parameterType="Map" resultType="int">
+		select count(imageno)      
+		from image                  
+		where imageno = #{imageno} and passwd = #{passwd}
+	</select>
+	<delete id="delete" parameterType="int">
+		delete from image
+		where imageno=#{imageno}
+	</delete>
+	<update id="update" parameterType="ImageDTO">
+		update IMAGE set
+		title = #{title}, 
+		content=#{content},
+		pname = #{pname}
+		where imageno=#{imageno}
+	</update>
+	<insert id="create" parameterType="ImageDTO">
+		insert into image                                
+		(imageno,pname,title,content,passwd,wdate,fname,grpno)
+		values                                            
+		((select NVL(Max(imageno),0)+1 as imageno from image),
+		#{pname},#{title},#{content},#{passwd},sysdate,#{fname},                              
+		(select NVL(Max(grpno),0)+1 as grpno from image)) 
+	</insert>
+	<select id="readImg" parameterType="int" resultType="Map">
+		SELECT * FROM                                             
+		(                                                        
+		   select                                               
+		       lag(imageno,2)     over (order by imageno) pre_imgno2, 
+		       lag(imageno,1)     over (order by imageno ) pre_imgno1,
+		       imageno,                                       
+		       lead(imageno,1)    over (order by imageno) nex_imgno1, 
+		       lead(imageno,2)    over (order by imageno) nex_imgno2, 
+		       lag(fname,2)  over (order by imageno) pre_file2,   
+		       lag(fname,1)  over (order by imageno ) pre_file1, 
+		       fname,                                         
+		       lead(fname,1) over (order by imageno) nex_file1,  
+		       lead(fname,2) over (order by imageno) nex_file2   
+		       from (                                          
+		            SELECT imageno, fname                       
+		            FROM image                                   
+		            ORDER BY imageno DESC                       
+		       )                                               
+		)                                                    
+		WHERE imageno = #{imageno}                                       
+	</select>
+	<select id="read" parameterType="int" resultType="ImageDTO">
+		select * from image
+		where imageno=#{imageno}
+	</select>
+	<select id="total" parameterType="Map" resultType="int">
+		select count(*) from image
+		<where>
+			<if test="col=='pname'">
+				pname like '%'||#{word}||'%'
+			</if>
+			<if test="col=='title'">
+				title like '%'||#{word}||'%'
+			</if>
+			<if test="col=='content'">
+				content like '%'||#{word}||'%'
+			</if>
+		</where>
+	</select>
+	<select id="list" resultType="ImageDTO" parameterType="Map">
+		select imageno, pname, title,content,passwd,wdate,grpno,indent,ansnum,fname,r         
+		from(                                                                                  
+			select imageno, pname, title,content,passwd,wdate,grpno,indent,ansnum,fname,rownum as r
+			from(                                                                              
+				select imageno, pname, title,content,passwd,wdate,grpno,indent,ansnum,fname   
+				from image                                                                   
+				<where>
+					<if test="col=='pname'">
+						pname like '%'||#{word}||'%'
+					</if>
+					<if test="col=='title'">
+						title like '%'||#{word}||'%'
+					</if>
+					<if test="col=='content'">
+						content like '%'||#{word}||'%'
+					</if>
+				</where>                                                                        
+				order by grpno desc ,ansnum asc                                              
+			)                                                                                 
+		)
+		<![CDATA[
+		where r >= #{sno} and r < = #{eno}      
+		]]>                                                      
+	</select>
+</mapper>

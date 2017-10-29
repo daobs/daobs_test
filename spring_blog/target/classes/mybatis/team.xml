@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="team">
+	<update id="updateFile" parameterType="Map">
+		update team set 
+		filename = #{filename}
+		where teamno = #{teamno}
+	</update>
+	<delete id="delete" parameterType="int">
+		delete from team where teamno = #{teamno}
+	</delete>
+	<update id="update" parameterType="TeamDTO">
+		update team set 
+		phone = #{phone},  
+		zipcode = #{zipcode},
+		address1 = #{address1},
+		address2 = #{address2},
+		skill = #{skill}, 
+		hobby = #{hobby}   
+		where teamno = #{teamno}
+	</update>
+	<select id="read" parameterType="int" resultType="TeamDTO">
+		select * from team
+		where teamno = #{teamno}
+	</select>
+	<select id="total" resultType="int" parameterType="Map">
+		select count(*) from team
+		<where>
+	       	<if test="col=='name'">
+	       		name like '%'||#{word}||'%'
+	       	</if>
+	       	<if test="col=='phone'">
+	       		phone like '%'||#{word}||'%'
+	       	</if>
+	       	<if test="col=='skill'">
+	       		skill like '%'||#{word}||'%'
+	       	</if>
+	    </where>  
+	</select>
+	<select id="list" parameterType="Map" resultType="TeamDTO">
+		select teamno, name,phone,skill,filename,r         
+		from(                                               
+			select teamno, name,phone,skill,filename,rownum as r
+			from(                                              
+				select teamno, name,phone,skill,filename           
+				from team                                         
+		        <where>
+		        	<if test="col=='name'">
+		        		name like '%'||#{word}||'%'
+		        	</if>
+		        	<if test="col=='phone'">
+		        		phone like '%'||#{word}||'%'
+		        	</if>
+		        	<if test="col=='skill'">
+		        		skill like '%'||#{word}||'%'
+		        	</if>
+		        </where>                                         
+				order by teamno desc                              
+			)                                               
+		 )
+		 <![CDATA[
+		 where r >= #{sno} and r <= #{eno} 
+		 ]]>                        
+	</select>
+	<insert id="create" parameterType="TeamDTO">
+		insert into team(                                                  
+		teamno,name,gender,phone,zipcode,address1,address2,skill,hobby,filename
+		) values (                                                          
+		(select NVL(Max(teamno),0)+1 from team),#{name},#{gender},#{phone},#{zipcode},                    
+		#{address1},#{address2},                                                               
+		#{skill},#{hobby},#{filename} )                                                            
+	                                                         
+	</insert>
+</mapper>
